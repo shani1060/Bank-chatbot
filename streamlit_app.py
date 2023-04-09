@@ -10,7 +10,7 @@ import fsspec
 
 # Load the preprocessed data
 df=pd.read_csv("./BankFAQs.csv")
-df1=pd.read_csv("./BankFAQs1.csv",encoding='ISO-8859-1')
+df1=pd.read_csv("./TobeMerged.csv",encoding='ISO-8859-1')
 
 data1=pd.concat([df1,df])
 
@@ -71,5 +71,5 @@ def app():
             st.success(answer)
 
 # Run the streamlit app
-if _name_ == '_main_':
+if __name__ == '__main__':
     app()
