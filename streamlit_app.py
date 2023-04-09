@@ -1,14 +1,16 @@
-from flask import Flask, request, jsonify, render_template
 import streamlit as st
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.svm import SVC
 import pandas as pd
 import numpy as np
+import fsspec 
+
+
 
 # Load the preprocessed data
-df = pd.read_csv(r"C:\Users\shani\Ask_talos live_banking project\BankFAQs.csv")
-df1=pd.read_csv(r"C:\Users\shani\Ask_talos live_banking project\TobeMerged.csv",encoding=('ISO-8859-1'))
+df=pd.read_csv("./BankFAQs.csv")
+df1=pd.read_csv("./BankFAQs1.csv",encoding='ISO-8859-1')
 
 data1=pd.concat([df1,df])
 
@@ -36,37 +38,38 @@ def get_answer(question):
     
     # If the predicted class is not the same as the actual class, return an error message
     if predicted_class != data1.iloc[most_similar_idx]['Class']:
-        return {'error': 'Could not find an appropriate answer.'}
+        return 'Could not find an appropriate answer.'
     
     # Get the answer and construct the response
     answer = data1.iloc[most_similar_idx]['Answer']
-    response = {
-        'answer': answer,
-        'predicted_class': predicted_class
-    }
+    response = f"Answer: {answer}"
     
     return response
 
-# Create a Flask app
-app = Flask(_name_,template_folder='Templates')
+# Create a streamlit app
+def app():
+    # Set the app title
+    st.set_page_config(page_title="Bank FAQ Chatbot", page_icon=":bank:")
 
-# Define the route for the chatbot web interface
-@app.route('/')
-def index():
-    return render_template('bank.html')
-    #return render_template('/templates/bank.html')  
+    # Add a title and description to the app
+    st.title("Bank FAQ Chatbot")
+    st.markdown("This app uses a machine learning model to answer frequently asked questions about banking.")
 
-# Define the API route for predicting answers
-@app.route('/predict', methods=['POST'])
-def predict():
-    # Get the question from the request
-    question = request.form['question']
+    # Create a text input for the user to ask a question
+    question = st.text_input("Ask a question:")
 
-    # Get the answer to the question
-    response = get_answer(question)
-    
-    return jsonify(response)
+    # Add a button to submit the question
+    if st.button("Submit"):
+        # Check if the user has entered a question
+        if question == "":
+            st.warning("Please enter a question.")
+        else:
+            # Call the get_answer function to predict the answer to the question
+            answer = get_answer(question)
 
-if  _name_ == '_main_':
-    app.run(debug=True,use_reloader=False
-           )
+            # Display the answer to the user
+            st.success(answer)
+
+# Run the streamlit app
+if _name_ == '_main_':
+    app()
